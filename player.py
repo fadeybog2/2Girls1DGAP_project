@@ -1,7 +1,8 @@
 from pygame import *
+from random import randint
 
 MOVE_SPEED = 7
-HEIGHT = 32
+HEIGHT = 48
 JUMP_POWER = 10
 GRAVITY = 0.5
 
@@ -23,7 +24,8 @@ class Player(sprite.Sprite):
         hero_size = self.image.get_rect().size
         self.height = HEIGHT
         self.width = self.height * hero_size[0] // hero_size[1]
-        self.image = transform.scale(self.image, [self.width, self.height])
+        self.image0 = transform.scale(self.image, [self.width, self.height])
+        self.image = self.image0
         self.rect = self.image.get_rect(topleft=(x, y))
         self.vx = self.vy = 0
         self.startX, self.startY = x, y
@@ -46,9 +48,11 @@ class Player(sprite.Sprite):
 
         if left:
             self.vx = -MOVE_SPEED  # движение влево
+            self.image = self.image0
 
         if right:
             self.vx = MOVE_SPEED  # движение вправо
+            self.image = transform.flip(self.image0, 1, 0)
 
         if not (left or right):  # стоит чиллит
             self.vx = 0
