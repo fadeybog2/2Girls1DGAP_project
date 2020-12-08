@@ -1,15 +1,12 @@
 from pygame import *
 
 MOVE_SPEED = 7
-WIDTH = 22
 HEIGHT = 32
-COLOR = (128, 128, 128)
 JUMP_POWER = 10
 GRAVITY = 0.5
 
 
 class Player(sprite.Sprite):
-    # Класс персонажа
     def __init__(self, x, y):
         """
         Конструктор класса Player
@@ -17,14 +14,20 @@ class Player(sprite.Sprite):
         self.vx, self.vy - скорость в проекции на горизонталь и вертикаль
         self.startX, self.startY = x, y - начальные координаты
         self.onGround = False - переменная, отслеживающая нахождение на земле
+
+        можно загрузить любой спрайт с названием hero.png, код сам отформатирует
+        размер
         """
         sprite.Sprite.__init__(self)
+        self.image = image.load("hero.png")
+        hero_size = self.image.get_rect().size
+        self.height = HEIGHT
+        self.width = self.height * hero_size[0] // hero_size[1]
+        self.image = transform.scale(self.image, [self.width, self.height])
+        self.rect = self.image.get_rect(topleft=(x, y))
         self.vx = self.vy = 0
         self.startX, self.startY = x, y
         self.onGround = False
-        self.image = Surface((WIDTH, HEIGHT))
-        self.image.fill(COLOR)
-        self.rect = self.image.get_rect(topleft=(x, y))
 
     def update(self, left, right, up, platforms):
         """
