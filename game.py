@@ -39,6 +39,11 @@ def main():
     pg.display.set_caption("Best Platformer")
     surf = Surface((SCREEN_WIDTH, SCREEN_HEIGHT))  # Поверхность для рисования
     surf.fill(BLACK)
+    bg = pg.image.load("background.jpg")  # background
+    bg_width = bg.get_rect().size[0] * SCREEN_WIDTH // SCREEN_HEIGHT
+    bg = pg.transform.scale(bg, [bg_width, SCREEN_HEIGHT])
+    bg_rect = bg.get_rect(center=[SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2])
+    screen.blit(bg, bg_rect)
 
     hero = Player(55, 55)  # создаем героя по выбраным координатам
     left = right = False 
@@ -117,7 +122,7 @@ def main():
             if event.type == KEYUP and event.key == K_a:
                 left = False
 
-        screen.blit(surf, (0, 0))
+        screen.blit(bg, bg_rect)
         camera.update(hero)  # центровка камеру относительно персонажа
         hero.update(left, right, up, platforms)  # передвижение
         # entities.draw(screen)  # функция рисования
