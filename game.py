@@ -37,7 +37,7 @@ def camera_configure(camera, target_rect):
 def main():
     pg.init()
     screen = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-    pg.display.set_caption("Best Platformer")
+    pg.display.set_caption("Bowling4life")
     surf = Surface((SCREEN_WIDTH, SCREEN_HEIGHT))  # Поверхность для рисования
     surf.fill(BLACK)
     bg = pg.image.load("background.jpg")  # background
@@ -50,17 +50,17 @@ def main():
     left = right = False 
     up = False
 
-    entities = pg.sprite.Group()# Все рисуемые объекты
-    mobs = pg.sprite.Group() # Все движущиеся объекты
+    entities = pg.sprite.Group()  # Все рисуемые объекты
+    mobs = pg.sprite.Group()  # Все движущиеся объекты
     platforms = []
 
     entities.add(hero)
-    monster = Mob(200, 700, 1, 90)
+    monster = Mob(200, 684, 1, 90)
     entities.add(monster)
     mobs.add(monster)
     platforms.append(monster)
 
-    tp = Teleport(128,512,800,64)
+    tp = Teleport(128, 512, 800, 64)
     entities.add(tp)
     platforms.append(tp)
 
