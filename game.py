@@ -1,6 +1,7 @@
 import pygame as pg
 from player import *
 from blocks import *
+from mobs import *
 
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 640
@@ -49,10 +50,19 @@ def main():
     left = right = False 
     up = False
 
-    entities = pg.sprite.Group()  # Все рисуемые объекты
+    entities = pg.sprite.Group()# Все рисуемые объекты
+    mobs = pg.sprite.Group() # Все движущиеся объекты
     platforms = []
 
     entities.add(hero)
+    monster = Mob(200, 700, 1, 90)
+    entities.add(monster)
+    mobs.add(monster)
+    platforms.append(monster)
+
+    tp = Teleport(128,512,800,64)
+    entities.add(tp)
+    platforms.append(tp)
 
     level = [
         "----------------------------------",
@@ -125,7 +135,7 @@ def main():
         screen.blit(bg, bg_rect)
         camera.update(hero)  # центровка камеру относительно персонажа
         hero.update(left, right, up, platforms)  # передвижение
-        # entities.draw(screen)  # функция рисования
+        mobs.update(platforms)
         for entity in entities:
             screen.blit(entity.image, camera.apply(entity))
 

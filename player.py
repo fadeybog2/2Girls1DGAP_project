@@ -1,5 +1,6 @@
 from pygame import *
-from random import randint
+import blocks
+import mobs
 
 MOVE_SPEED = 7
 HEIGHT = 48
@@ -79,6 +80,10 @@ class Player(sprite.Sprite):
         for p in platforms:
             if sprite.collide_rect(self, p):
                 # проверка столкновения с платформой
+                if isinstance(p, blocks.Spike) or isinstance(p, mobs.Mob): # если пересакаемый блок - blocks.BlockDie или Monster
+                       self.die()
+                elif isinstance(p, blocks.Teleport):
+                    self.teleporting(p.goX, p.goY)
 
                 if vx > 0:
                     self.rect.right = p.rect.left
@@ -94,3 +99,13 @@ class Player(sprite.Sprite):
                 if vy < 0:
                     self.rect.top = p.rect.bottom  # не может пробить платформу
                     self.vy = 0
+
+    def teleporting(self, goX, goY):
+        self.rect.x = goX
+        self.rect.y = goY
+        
+    def die(self):
+        time.wait(1000)
+        self.xvel = 0
+        self.yvel = 0
+        self.teleporting(self.startX, self.startY) # перемещаемся в начальные ко
