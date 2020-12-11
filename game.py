@@ -61,8 +61,10 @@ def main():
     platforms.append(monster)
 
     tp = Teleport(128, 512, 800, 64)
-    entities.add(tp)
+    sp = Spike(600, 684)
+    entities.add(tp, sp)
     platforms.append(tp)
+    platforms.append(sp)
 
     level = [
         "----------------------------------",

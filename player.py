@@ -80,8 +80,9 @@ class Player(sprite.Sprite):
         for p in platforms:
             if sprite.collide_rect(self, p):
                 # проверка столкновения с платформой
-                if isinstance(p, blocks.Spike) or isinstance(p, mobs.Mob): # если пересакаемый блок - blocks.BlockDie или Monster
-                       self.die()
+                if isinstance(p, blocks.Spike) or isinstance(p, mobs.Mob):
+                    # если пересакаемый блок - blocks.BlockDie или Monster
+                    self.die()
                 elif isinstance(p, blocks.Teleport):
                     self.teleporting(p.goX, p.goY)
 
@@ -105,7 +106,8 @@ class Player(sprite.Sprite):
         self.rect.y = goY
         
     def die(self):
-        time.wait(1000)
-        self.xvel = 0
-        self.yvel = 0
-        self.teleporting(self.startX, self.startY) # перемещаемся в начальные ко
+        time.wait(500)
+        self.vx = 0
+        self.vy = 0
+        self.teleporting(self.startX, self.startY)
+        # перемещаемся в начальные координаты
