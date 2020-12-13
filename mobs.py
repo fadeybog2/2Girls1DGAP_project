@@ -1,4 +1,5 @@
 from pygame import *
+from random import randint
 
 MOB_HEIGHT = 48
 
@@ -11,6 +12,8 @@ class Mob(sprite.Sprite):
     self.home - начальные координаты
     self.area - max расстояние, которое может пройти в одну сторону
     self.xvel - скорость передвижения по горизонтали
+    self.is_alive - жив ли?
+    self.hp - здоровье, задается рандомным целым числом от 1 до 10
 
     можно загрузить любой спрайт с названием mob.png, код сам отформатирует
     размер
@@ -26,6 +29,8 @@ class Mob(sprite.Sprite):
         self.home = x
         self.area = area
         self.xvel = vel
+        self.is_alive = True
+        self.hp = randint(1, 10)
 
     def update(self, platforms):  # по принципу героя
         """
@@ -38,6 +43,7 @@ class Mob(sprite.Sprite):
 
         if abs(self.home - self.rect.x) > self.area:
             self.xvel *= -1  # если прошли max растояние, то идем обратно
+        self.check_if_dead()
 
     def bump(self, platforms):
         """
@@ -54,3 +60,11 @@ class Mob(sprite.Sprite):
                     self.rect.left = p.rect.right
 
                 self.xvel *= -1  # то поворачиваем в обратную сторону
+
+    def check_if_dead(self):
+        """
+        Функция проверяет жив ли моб
+        """
+        if self.hp <= 0:
+            self.hp = 0
+            self.is_alive = False
