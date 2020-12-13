@@ -15,7 +15,10 @@ class Player(sprite.Sprite):
 
         self.vx, self.vy - скорость в проекции на горизонталь и вертикаль
         self.startX, self.startY = x, y - начальные координаты
-        self.onGround = False - переменная, отслеживающая нахождение на земле
+        self.onGround - переменная, отслеживающая нахождение на земле
+        self.is_alive - жив ли?
+        self.facing_right - куда смотрит персонаж
+        self.hp - переменная, отслеживающая здоровье (хп, hp)
 
         можно загрузить любой спрайт с названием hero.png, код сам отформатирует
         размер
@@ -31,6 +34,9 @@ class Player(sprite.Sprite):
         self.vx = self.vy = 0
         self.startX, self.startY = x, y
         self.onGround = False
+        self.is_alive = True
+        self.facing_right = False
+        self.hp = 5
 
     def update(self, left, right, up, platforms):
         """
@@ -50,10 +56,12 @@ class Player(sprite.Sprite):
         if left:
             self.vx = -MOVE_SPEED  # движение влево
             self.image = self.image0
+            self.facing_right = False
 
         if right:
             self.vx = MOVE_SPEED  # движение вправо
-            self.image = transform.flip(self.image0, 1, 0)
+            self.image = transform.flip(self.image0, True, False)
+            self.facing_right = True
 
         if not (left or right):  # стоит чиллит
             self.vx = 0
@@ -71,7 +79,7 @@ class Player(sprite.Sprite):
 
     def bump(self, vx, vy, platforms):
         """
-        Функция взаимодействия с платформами (vibe check)
+        Функция взаимодействия с платформами и врагами (vibe check)
 
         vx: скорость по горизонтали
         vy: скорость по вертикали
@@ -80,34 +88,73 @@ class Player(sprite.Sprite):
         for p in platforms:
             if sprite.collide_rect(self, p):
                 # проверка столкновения с платформой
-                if isinstance(p, blocks.Spike) or isinstance(p, mobs.Mob):
-                    # если пересакаемый блок - blocks.BlockDie или Monster
-                    self.die()
+                if isinstance(p, blocks.Spike):
+                    # если пересакаемый блок - шипы
+                    self.reborn()
+                elif isinstance(p, mobs.Mob):
+                    self.check_mob_hit(p)
                 elif isinstance(p, blocks.Teleport):
                     self.teleporting(p.goX, p.goY)
 
-                if vx > 0:
-                    self.rect.right = p.rect.left
+                else:
+                    if vx > 0:
+                        self.rect.right = p.rect.left
+                        self.vx = 0
 
-                if vx < 0:
-                    self.rect.left = p.rect.right
+                    if vx < 0:
+                        self.rect.left = p.rect.right
+                        self.vx = 0
 
-                if vy > 0:
-                    self.rect.bottom = p.rect.top
-                    self.onGround = True  # теперь он на земле
-                    self.vy = 0
+                    if vy > 0:
+                        self.rect.bottom = p.rect.top
+                        self.onGround = True  # теперь он на земле
+                        self.vy = 0
 
-                if vy < 0:
-                    self.rect.top = p.rect.bottom  # не может пробить платформу
-                    self.vy = 0
+                    if vy < 0:
+                        self.rect.top = p.rect.bottom  # не может пробить платформу
+                        self.vy = 0
+
+    def check_mob_hit(self, mob):
+        """
+        Функция проверяет тип столкновения с мобом
+
+        mob - объект класса Mob
+        """
+        vector_x = mob.rect.center[0] - self.rect.center[0]
+        vector_y = mob.rect.center[1] - self.rect.center[1]
+        # проверяем не прыгнули ли на моба сверху (да-да, как в марио)
+        if abs(vector_x) <= (self.width + mob.width) / 2 and vector_y >= 0:
+            self.vy *= -1  # отталкиваемся от моба
+            self.rect.y += self.vy
+            mob.hp -= 3  # понижаем хп моба
+        else:
+            self.reborn()  # иначе сами теряем хп
 
     def teleporting(self, goX, goY):
+        """
+        Функция телепортирования
+
+        goX - координата x места назначения
+        goY - координата y места назначения
+        """
         self.rect.x = goX
         self.rect.y = goY
         
+    def reborn(self):
+        """
+        Функция возрождения
+
+        Если жизни еще остались - возрождается, если нет - умирает и endscreen
+        """
+        self.hp -= 1
+        if self.hp == 0:  # умер совсем
+            self.die()
+        else:
+            self.vx = 0
+            self.vy = 0
+            time.wait(500)
+            self.teleporting(self.startX, self.startY)
+            # перемещаемся в начальные координаты
+
     def die(self):
-        time.wait(500)
-        self.vx = 0
-        self.vy = 0
-        self.teleporting(self.startX, self.startY)
-        # перемещаемся в начальные координаты
+        self.is_alive = False
