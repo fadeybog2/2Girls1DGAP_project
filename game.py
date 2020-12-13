@@ -6,6 +6,8 @@ from mobs import *
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 640
 BLACK = (0, 0, 0)
+MAROON = (128, 0, 0)
+WHITE = (255, 255, 255)
 FPS = 60
 
 
@@ -47,7 +49,6 @@ def main():
     screen.blit(bg, bg_rect)
 
     hero = Player(55, 55)  # создаем героя по выбраным координатам
-    left = right = False 
     up = False
 
     entities = pg.sprite.Group()  # Все рисуемые объекты
@@ -67,30 +68,30 @@ def main():
     platforms.append(sp)
 
     level = [
-        "----------------------------------",
-        "-                                -",
-        "-                       ---      -",
-        "-                           -    -",
-        "-       -----                    -",
-        "-                  --          - -",
-        "--                               -",
-        "-                            --- -",
-        "-                 ----           -",
-        "-     --                         -",
-        "-                                -",
-        "--                               -",
-        "-                                -",
-        "-                                -",
-        "- ---                            -",
-        "-                                -",
-        "-                                -",
-        "-   ------          ----         -",
-        "-                                -",
-        "-                         -      -",
-        "-                            --  -",
-        "-            ---                 -",
-        "-                                -",
-        "----------------------------------"]
+        "==================================",
+        "=                                =",
+        "=                       ---      =",
+        "=                           -    =",
+        "=       -----                    =",
+        "=                  --          - =",
+        "=-                               =",
+        "=                            --- =",
+        "=                 ----           =",
+        "=     --                         =",
+        "=                                =",
+        "=-                               =",
+        "=                                =",
+        "=                                =",
+        "= ---                            =",
+        "=                                =",
+        "=                                =",
+        "=   ------          ----         =",
+        "=                                =",
+        "=                         -      =",
+        "=                            --  =",
+        "=            ---                 =",
+        "=                                =",
+        "=================================="]
 
     clock = pg.time.Clock()
     x = y = 0
@@ -103,6 +104,11 @@ def main():
                 platform = Platform(x, y)
                 entities.add(platform)
                 platforms.append(platform)
+
+            elif symbol == "=":
+                wall = Wall(x, y)
+                entities.add(wall)
+                platforms.append(wall)
 
             x += PLATFORM_WIDTH
         y += PLATFORM_HEIGHT
@@ -118,28 +124,39 @@ def main():
     finished = False
     while not finished:
         clock.tick(FPS)
+        left = right = False
+        if pg.key.get_pressed()[pg.K_a]:
+            left = True
+        if pg.key.get_pressed()[pg.K_d]:
+            right = True
         for event in pg.event.get():
             if event.type == QUIT:
                 finished = True
-            if event.type == KEYDOWN and event.key == K_SPACE:
+            if event.type == KEYDOWN and event.key == K_w:
                 up = True
-            if event.type == KEYDOWN and event.key == K_a:
-                left = True
-            if event.type == KEYDOWN and event.key == K_d:
-                right = True
-            if event.type == KEYUP and event.key == K_SPACE:
+            if event.type == KEYUP and event.key == K_w:
                 up = False
-            if event.type == KEYUP and event.key == K_d:
-                right = False
-            if event.type == KEYUP and event.key == K_a:
-                left = False
 
-        screen.blit(bg, bg_rect)
-        camera.update(hero)  # центровка камеру относительно персонажа
-        hero.update(left, right, up, platforms)  # передвижение
-        mobs.update(platforms)
-        for entity in entities:
-            screen.blit(entity.image, camera.apply(entity))
+        if not hero.is_alive:
+            screen.fill(BLACK)
+            font = pg.font.Font(None, 120)
+            text = font.render("YOU DIED", True, WHITE)
+            text_rect = text.get_rect(center=(SCREEN_WIDTH // 2,
+                                              SCREEN_HEIGHT // 2))
+            screen.blit(text, text_rect)
+
+        else:
+            screen.blit(bg, bg_rect)
+            camera.update(hero)  # центровка камеру относительно персонажа
+            hero.update(left, right, up, platforms)  # передвижение
+            mobs.update(platforms)
+            for mob in mobs:
+                if not mob.is_alive:
+                    mob.kill()  # отсеивает мёртвые
+                    mobs.remove(mob)
+                    platforms.remove(mob)
+            for entity in entities:
+                screen.blit(entity.image, camera.apply(entity))
 
         pg.display.update()
 
