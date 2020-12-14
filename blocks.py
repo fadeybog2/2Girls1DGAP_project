@@ -41,7 +41,7 @@ class Spike(Platform):
 class Teleport(Platform):
     def __init__(self, x, y, goX, goY):
         Platform.__init__(self, x, y)
-        self.image = Surface((self.size[0], self.size[1]))
+        self.image = image.load("portal.png")
+        self.rect = self.image.get_rect(self.image, center=(x, y))
         self.goX = goX  # координаты назначения перемещения
         self.goY = goY  # координаты назначения перемещения
-        self.image.fill(COLOR3)

@@ -71,37 +71,14 @@ def main():
     mobs.add(monster)
     platforms.append(monster)
 
-    tp = Teleport(128, 512, 800, 64)
+    tp = Teleport(128, 495, 800, 64)
     sp = Spike(600, 684)
     entities.add(tp, sp)
     platforms.append(tp)
     platforms.append(sp)
 
-    level = [
-        "==================================",
-        "=                                =",
-        "=                       ---      =",
-        "=                           -    =",
-        "=       -----                    =",
-        "=                  --          - =",
-        "=-                               =",
-        "=                            --- =",
-        "=                 ----           =",
-        "=     --                         =",
-        "=                                =",
-        "=-                               =",
-        "=                                =",
-        "=                                =",
-        "= ---                            =",
-        "=                                =",
-        "=                                =",
-        "=   ------          ----         =",
-        "=                                =",
-        "=                         -      =",
-        "=                            --  =",
-        "=            ---                 =",
-        "=                                =",
-        "=================================="]
+    f = open('level.txt', 'r')
+    level = [line.strip() for line in f]
 
     clock = pg.time.Clock()
     x = y = 0
