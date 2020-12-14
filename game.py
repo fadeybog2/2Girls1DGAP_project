@@ -36,6 +36,15 @@ def camera_configure(camera, target_rect):
     return Rect(l, t, w, h)
 
 
+def spawn_fireball(player):
+    if player.facing_right:
+        ball = Fireball(player.rect.right, player.rect.center[1])
+    else:
+        ball = Fireball(player.rect.left, player.rect.center[1])
+        ball.flip_velocity()
+    return ball
+
+
 def main():
     pg.init()
     screen = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -53,6 +62,7 @@ def main():
 
     entities = pg.sprite.Group()  # Все рисуемые объекты
     mobs = pg.sprite.Group()  # Все движущиеся объекты
+    balls = pg.sprite.Group()  # Все летящие снаряды
     platforms = []
 
     entities.add(hero)
@@ -67,8 +77,31 @@ def main():
     platforms.append(tp)
     platforms.append(sp)
 
-    f = open('level.txt', 'r')
-    level = [line.strip() for line in f]
+    level = [
+        "==================================",
+        "=                                =",
+        "=                       ---      =",
+        "=                           -    =",
+        "=       -----                    =",
+        "=                  --          - =",
+        "=-                               =",
+        "=                            --- =",
+        "=                 ----           =",
+        "=     --                         =",
+        "=                                =",
+        "=-                               =",
+        "=                                =",
+        "=                                =",
+        "= ---                            =",
+        "=                                =",
+        "=                                =",
+        "=   ------          ----         =",
+        "=                                =",
+        "=                         -      =",
+        "=                            --  =",
+        "=            ---                 =",
+        "=                                =",
+        "=================================="]
 
     clock = pg.time.Clock()
     x = y = 0
@@ -113,6 +146,10 @@ def main():
                 up = True
             if event.type == KEYUP and event.key == K_w:
                 up = False
+            if event.type == KEYDOWN and event.key == K_LALT:
+                ball = spawn_fireball(hero)
+                balls.add(ball)
+                entities.add(ball)
 
         if not hero.is_alive:
             screen.fill(BLACK)
@@ -132,6 +169,10 @@ def main():
                     mob.kill()  # отсеивает мёртвые
                     mobs.remove(mob)
                     platforms.remove(mob)
+            for ball in balls:
+                if not ball.is_alive:
+                    ball.kill()  # отсеивает мёртвые
+                ball.move(mobs, platforms)
             for entity in entities:
                 screen.blit(entity.image, camera.apply(entity))
 

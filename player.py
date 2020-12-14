@@ -6,6 +6,7 @@ MOVE_SPEED = 7
 HEIGHT = 48
 JUMP_POWER = 10
 GRAVITY = 0.5
+FIREBALL_VELOCITY = 10
 
 
 class Player(sprite.Sprite):
@@ -158,3 +159,56 @@ class Player(sprite.Sprite):
 
     def die(self):
         self.is_alive = False
+
+
+class Fireball(sprite.Sprite):
+    """
+    Конструктор класса Fireball
+
+    self.vx - скорость в проекции на горизонталь (по вертикали нельзя - фича)
+    x, y - начальные координаты
+    self.is_alive - жив ли?
+    """
+    def __init__(self, x, y):
+        sprite.Sprite.__init__(self)
+        self.image = image.load("fireball.png")
+        self.rad = 12
+        self.image = transform.scale(self.image, [self.rad*2, self.rad*2])
+        self.rect = self.image.get_rect(center=(x, y))
+        self.is_alive = True
+        self.vx = FIREBALL_VELOCITY
+
+    def check_walls(self, platforms):
+        """
+        Функция взаимодействия с платформами (vibe check)
+
+        platforms: список платформ и стен
+        """
+        for p in platforms:
+            if sprite.collide_rect(self, p):
+                # проверка столкновения с платформой
+                if not isinstance(p, mobs.Mob) or \
+                        not isinstance(p, Player):
+                    # если не моб или игрок
+                    self.is_alive = False
+
+    def flip_velocity(self):
+        self.vx *= -1
+
+    def move(self, mobs, platforms):
+        self.rect.x += self.vx
+        self.hit_check(mobs)
+        self.check_walls(platforms)
+
+    def hit_check(self, mobs):
+        """
+        Функция взаимодействия с мобами (vibe check)
+
+        mobs: список мобов
+        """
+        # FIXME почему-то один fireball снижает 2 hp за раз ???
+        for m in mobs:
+            if sprite.collide_rect(self, m):
+                # проверка столкновения с мобом
+                m.hp -= 1
+                self.is_alive = False
