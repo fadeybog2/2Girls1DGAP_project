@@ -58,7 +58,7 @@ def main():
     screen.blit(bg, bg_rect)
 
     hero = Player(55, 55)  # создаем героя по выбраным координатам
-    up = False
+    up = attacking = False
 
     entities = pg.sprite.Group()  # Все рисуемые объекты
     mobs = pg.sprite.Group()  # Все движущиеся объекты
@@ -109,6 +109,7 @@ def main():
 
     camera = Camera(camera_configure, level_width, level_height)
     finished = False
+    counter = 0
     while not finished:
         clock.tick(FPS)
         left = right = False
@@ -127,6 +128,13 @@ def main():
                 ball = spawn_fireball(hero)
                 balls.add(ball)
                 entities.add(ball)
+                attacking = True
+
+        if attacking:
+            counter += 1
+            if counter == FPS // 3:
+                counter = 0
+                attacking = False
 
         if not hero.is_alive:
             screen.fill(BLACK)
@@ -139,7 +147,7 @@ def main():
         else:
             screen.blit(bg, bg_rect)
             camera.update(hero)  # центровка камеру относительно персонажа
-            hero.update(left, right, up, platforms)  # передвижение
+            hero.update(left, right, up, attacking, platforms)  # передвижение
             mobs.update(platforms)
             for mob in mobs:
                 if not mob.is_alive:

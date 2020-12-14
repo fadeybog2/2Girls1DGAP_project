@@ -21,16 +21,19 @@ class Player(sprite.Sprite):
         self.facing_right - куда смотрит персонаж
         self.hp - переменная, отслеживающая здоровье (хп, hp)
 
-        можно загрузить любой спрайт с названием hero.png, код сам отформатирует
-        размер
+        можно загрузить любой спрайт с названием hero.png и hero_scream.png, код
+        сам отформатирует размер
         """
         sprite.Sprite.__init__(self)
-        self.image = image.load("hero.png")
-        hero_size = self.image.get_rect().size
+        self.image0 = image.load("hero.png")  # норми спрайт
+        self.image1 = image.load("hero_scream.png")  # атакующий
+        hero_size = self.image0.get_rect().size
         self.height = HEIGHT
         self.width = self.height * hero_size[0] // hero_size[1]
-        self.image0 = transform.scale(self.image, [self.width, self.height])
-        self.image = self.image0
+        self.image0 = transform.scale(self.image0, [self.width, self.height])
+        self.image1 = transform.scale(self.image1, [self.width, self.height])
+
+        self.image = self.image0  # default
         self.rect = self.image.get_rect(topleft=(x, y))
         self.vx = self.vy = 0
         self.startX, self.startY = x, y
@@ -39,7 +42,7 @@ class Player(sprite.Sprite):
         self.facing_right = False
         self.hp = 5
 
-    def update(self, left, right, up, platforms):
+    def update(self, left, right, up, attacking, platforms):
         """
         Функция обработки нажатия клавиш
 
@@ -47,7 +50,13 @@ class Player(sprite.Sprite):
         right: управление движением вправо
         up: прыжок
         platforms: список платформ
+        attacking: переменная, отслеживающая атаку
+        image: рисуемый спрайт
         """
+        if attacking:
+            image = self.image1
+        else:
+            image = self.image0
 
         if up:
             if self.onGround:
@@ -56,16 +65,19 @@ class Player(sprite.Sprite):
 
         if left:
             self.vx = -MOVE_SPEED  # движение влево
-            self.image = self.image0
             self.facing_right = False
 
         if right:
             self.vx = MOVE_SPEED  # движение вправо
-            self.image = transform.flip(self.image0, True, False)
             self.facing_right = True
 
         if not (left or right):  # стоит чиллит
             self.vx = 0
+
+        if self.facing_right:
+            self.image = transform.flip(image, True, False)
+        else:
+            self.image = image
 
         if not self.onGround:
             # изменение скорости в прыжке
@@ -158,6 +170,9 @@ class Player(sprite.Sprite):
             # перемещаемся в начальные координаты
 
     def die(self):
+        """
+        Функция смерти
+        """
         self.is_alive = False
 
 
