@@ -12,7 +12,7 @@ class Wall(sprite.Sprite):
         sprite.Sprite.__init__(self)
         self.size = (PLATFORM_WIDTH, PLATFORM_HEIGHT)
         self.image = Surface((self.size[0], self.size[1]))
-        self.image.fill(Color(COLOR2))
+        self.image.fill(COLOR2)
         self.rect = self.image.get_rect(topleft=(x, y))
 
 
@@ -21,7 +21,7 @@ class Platform(sprite.Sprite):
         sprite.Sprite.__init__(self)
         self.size = (PLATFORM_WIDTH, PLATFORM_HEIGHT)
         self.image = Surface((self.size[0], self.size[1] // 2))
-        self.image.fill(Color(COLOR1))
+        self.image.fill(COLOR1)
         self.rect = self.image.get_rect(topleft=(x, y))
 
 
