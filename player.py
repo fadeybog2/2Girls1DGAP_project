@@ -111,6 +111,7 @@ class Player(sprite.Sprite):
 
                 else:
                     if vx > 0:
+
                         self.rect.right = p.rect.left
                         self.vx = 0
 
@@ -134,13 +135,15 @@ class Player(sprite.Sprite):
         mob - объект класса Mob
         """
         vector_x = mob.rect.center[0] - self.rect.center[0]
-        vector_y = mob.rect.center[1] - self.rect.center[1]
+        vector_y = mob.rect.center[1] - self.rect.bottom
         # проверяем не прыгнули ли на моба сверху (да-да, как в марио)
         if abs(vector_x) <= (self.width + mob.width) / 2 and vector_y >= 0:
-            self.vy *= -1  # отталкиваемся от моба
+            self.vy = -2 * JUMP_POWER // 3  # отталкиваемся от моба
             self.rect.y += self.vy
             mob.hp -= 3  # понижаем хп моба
+            print(vector_y)
         else:
+            print(vector_y)
             self.reborn()  # иначе сами теряем хп
 
     def teleporting(self, goX, goY):
@@ -150,6 +153,8 @@ class Player(sprite.Sprite):
         goX - координата x места назначения
         goY - координата y места назначения
         """
+        self.vx = 0
+        self.vy = 0
         self.rect.x = goX
         self.rect.y = goY
         

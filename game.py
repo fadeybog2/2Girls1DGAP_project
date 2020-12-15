@@ -2,6 +2,7 @@ import pygame as pg
 from player import *
 from blocks import *
 from mobs import *
+from random import randint
 
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 640
@@ -37,12 +38,55 @@ def camera_configure(camera, target_rect):
 
 
 def spawn_fireball(player):
+    """
+    Функция спавнит fireball в зависимости от направления, куда смотрит игрок
+
+    player: объект класса player
+
+    Возвращает объект класса Fireball
+    """
     if player.facing_right:
         ball = Fireball(player.rect.right, player.rect.center[1])
     else:
         ball = Fireball(player.rect.left, player.rect.center[1])
         ball.flip_velocity()
     return ball
+
+
+def spawn_new_thing(class0, platforms, free_platforms, area=0, goX=0, goY=0):
+    """
+    Функция спавнит нового моба, шип или телепорт рандомно на свободные
+    платформы
+
+    platforms: список платформ
+    free_platforms: количество свободных для спавна платформ
+    class0: объект какого класса мы спавним, можно Mob, Spike или Teleport
+    area: max длина перемещения моба
+    goX, goY - координаты назначения телепорта
+
+    Возвращает объект класса class0
+    """
+    number = randint(2, free_platforms)
+    i = 0
+    done = False
+    if free_platforms != 0:
+        for p in platforms:
+            if p.is_free:
+                i += 1
+                if i == number:
+                    x, y = p.rect.topleft[0], p.rect.topleft[1]
+                    if class0 == Mob:
+                        thing = Mob(x, y, area)
+                    elif class0 == Spike:
+                        thing = Spike(x, y)
+                    elif class0 == Teleport:
+                        thing = Teleport(x, y, goX, goY)
+                    done = True
+                    free_platforms -= 1
+    if done:
+        return thing
+    else:
+        return 1
 
 
 def main():
@@ -64,23 +108,11 @@ def main():
     mobs = pg.sprite.Group()  # Все движущиеся объекты
     balls = pg.sprite.Group()  # Все летящие снаряды
     platforms = []
-
-    entities.add(hero)
-    monster = Mob(200, 684, 1, 90)
-    entities.add(monster)
-    mobs.add(monster)
-    platforms.append(monster)
-
-    tp = Teleport(128, 495, 800, 64)
-    sp = Spike(600, 684)
-    entities.add(tp, sp)
-    platforms.append(tp)
-    platforms.append(sp)
+    free_platforms = 0  # кол-во свободных для спавна платформ
 
     f = open('level.txt', 'r')
     level = [line.strip() for line in f]
 
-    clock = pg.time.Clock()
     x = y = 0
     """
     читаем уровень, определяем координат платформ
@@ -91,6 +123,7 @@ def main():
                 platform = Platform(x, y)
                 entities.add(platform)
                 platforms.append(platform)
+                free_platforms += 1
 
             elif symbol == "=":
                 wall = Wall(x, y)
@@ -106,6 +139,22 @@ def main():
     """
     level_width = len(level[0]) * PLATFORM_WIDTH
     level_height = len(level) * PLATFORM_HEIGHT
+
+    # создаем телепорт и шип
+    tp = spawn_new_thing(Teleport, platforms, free_platforms, 0, 900, 64)
+    sp = spawn_new_thing(Spike, platforms, free_platforms)
+    entities.add(tp, sp)
+    platforms.append(tp)
+    platforms.append(sp)
+
+    entities.add(hero)
+    for i in range(0, 3):
+        monster = spawn_new_thing(Mob, platforms, free_platforms, 10)
+        entities.add(monster)
+        mobs.add(monster)
+        platforms.append(monster)
+
+    clock = pg.time.Clock()
 
     camera = Camera(camera_configure, level_width, level_height)
     finished = False
@@ -154,6 +203,12 @@ def main():
                     mob.kill()  # отсеивает мёртвые
                     mobs.remove(mob)
                     platforms.remove(mob)
+                    free_platforms += 1
+                    enemy = spawn_new_thing(Mob, platforms, free_platforms, 10)
+                    if not type(enemy) == int:
+                        entities.add(enemy)
+                        mobs.add(enemy)
+                        platforms.append(enemy)
             for ball in balls:
                 if not ball.is_alive:
                     ball.kill()  # отсеивает мёртвые
