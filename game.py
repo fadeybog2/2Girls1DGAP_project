@@ -106,6 +106,10 @@ def main():
     bg_width = bg.get_rect().size[0] * SCREEN_WIDTH // SCREEN_HEIGHT
     bg = pg.transform.scale(bg, [bg_width, SCREEN_HEIGHT])
     bg_rect = bg.get_rect(center=[SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2])
+    health = pg.image.load("heart.png")
+    health_x, health_y = 35, 30
+    life = pg.image.load("live.png")
+    life_x, life_y = 65, 0
 
     hero = Player(55, 55)  # создаем героя по выбраным координатам
     up = attacking = False
@@ -236,6 +240,21 @@ def main():
                     ball.move(mobs, platforms)
                 for entity in entities:
                     screen.blit(entity.image, camera.apply(entity))
+                for i in range(hero.hp):
+                    hp_rect = health.get_rect(topleft=[health_x + 35 * i,
+                                                       health_y])
+                    screen.blit(health, hp_rect)
+                for i in range(hero.lives):
+                    lf_rect = life.get_rect(topleft=[life_x + 35 * i,
+                                                           life_y])
+                    screen.blit(life, lf_rect)
+                font = pg.font.Font(None, 30)
+                text = font.render("Lives:", True, WHITE)
+                text_rect = text.get_rect(topleft = (0, 5))
+                screen.blit(text, text_rect)
+                text1 = font.render("HP:", True, WHITE)
+                text_rect1 = text.get_rect(topleft=(0, 39))
+                screen.blit(text1, text_rect1)
 
         pg.display.update()
 
