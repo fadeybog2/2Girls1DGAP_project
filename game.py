@@ -205,6 +205,12 @@ def main():
     clock = pg.time.Clock()
 
     camera = Camera(camera_configure, level_width, level_height)
+
+    # фоновая музыка 
+    pg.mixer.music.load('menu_sound.mp3') 
+    pg.mixer.music.set_volume(0.1) 
+    pg.mixer.music.play(-1)
+
     finished = False
     while not finished:
         clock.tick(FPS)
@@ -264,9 +270,15 @@ def main():
                         if play.click:
                             # закрываем меню, начинаем игру
                             started, gameplay = False, True
+                            # фоновая музыка игрового процесса
+                            pg.mixer.music.load('gameplay_sound.mp3')  
+                            pg.mixer.music.play(-1)
+
+                            
                         if rules.click:
                             # закрываем меню, открываем правила
                             started, manual = False, True
+                            
             if manual:
                 # если тыкнули на правила, то рисуем правила
                 manual_draw(screen, ls, SCREEN_WIDTH, SCREEN_HEIGHT, quit)

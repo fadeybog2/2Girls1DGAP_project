@@ -19,6 +19,9 @@ class Mob(pg.sprite.Sprite):
     self.time_hit - время с последнего удара (нужно для анимации)
     self.hp - здоровье, задается рандомным целым числом от 1 до 10
 
+    self.death_sound - звук, издаваемый при смерти, загрузка из файла 
+    mobs_death_sound.wav
+
     можно загрузить любой спрайт с названием mob.png, код сам отформатирует
     размер
     """
@@ -38,6 +41,7 @@ class Mob(pg.sprite.Sprite):
         self.startX, self.startY = x, y
         self.area = area
         self.xvel = randint(0, 2)
+        self.death_sound = pg.mixer.Sound('mobs_death_sound.wav')
         self.is_alive = True
         self.is_free = False
         self.got_hit = False
@@ -96,4 +100,5 @@ class Mob(pg.sprite.Sprite):
         if self.hp <= 0:
             self.hp = 0
             hero.score += 1  # увеличиваем счет в игре
+            self.death_sound.play()
             self.is_alive = False

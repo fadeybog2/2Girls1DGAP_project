@@ -32,6 +32,9 @@ class Player(pg.sprite.Sprite):
         self.lives - жизни
         self.score - счет
 
+        self.teleporting_sound - звук при телепортации, загружается из файла 
+        teleporting_sound.wav
+
         можно загрузить любой спрайт с названием hero.png и hero_scream.png, код
         сам отформатирует размер
         """
@@ -52,6 +55,7 @@ class Player(pg.sprite.Sprite):
         self.rect = self.image.get_rect(topleft=(x, y))
         self.vx = self.vy = 0
         self.startX, self.startY = x, y
+        self.teleporting_sound = pg.mixer.Sound('teleporting_sound.wav')
         self.onGround = False
         self.is_alive = True
         self.facing_right = False
@@ -219,6 +223,7 @@ class Player(pg.sprite.Sprite):
         self.vy = 0
         self.rect.x = goX
         self.rect.y = goY
+        self.teleporting_sound.play()
 
     def get_damage(self, fps):
         """
