@@ -100,7 +100,8 @@ def main():
     surf.fill(BLACK)
     play = Button(screen, 380, 250, BLACK, 'play!')
     rules = Button(screen, 380, 300, BLACK, 'rules')
-    quit = Button(screen, 350, 560, BLACK, 'quit')  # кнопка руководства
+    quit = Button(screen, 350, 560, BLACK, 'quit')  # кнопка мануала
+    restart = Button(screen, 320, 450, BLACK, 'new game')  # кнопка перезапуска
     buttons = [play, rules]  # список кнопок меню
     ls = pg.image.load("Zastavka.jpg")  # фон меню
     bg = pg.image.load("background.jpg")  # background
@@ -219,6 +220,15 @@ def main():
                                               SCREEN_HEIGHT // 2))
             gameplay = False
             screen.blit(text, text_rect)
+            restart.draw(WHITE)
+            for event in pg.event.get():
+                if event.type == MOUSEBUTTONDOWN:
+                    (x_hit, y_hit) = event.pos
+                    restart.hitting(x_hit, y_hit)
+                    if restart.click:
+                        hero.lives = 3
+                        hero.is_alive, started, gameplay = True, True, False
+
 
         else:
             if started:
