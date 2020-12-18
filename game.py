@@ -87,9 +87,9 @@ def spawn_new_thing(class0, platforms, free_platforms, area=0, goX=0, goY=0):
                     done = True
                     free_platforms -= 1
     if done:
-        return thing
+        return thing, free_platforms
     else:
-        return 1
+        return 1, free_platforms
 
 
 def main():
@@ -123,6 +123,7 @@ def main():
     mobs = pg.sprite.Group()  # Все движущиеся объекты
     balls = pg.sprite.Group()  # Все летящие снаряды
     platforms = []
+    coords_for_tp = []
     free_platforms = 0  # кол-во свободных для спавна платформ
 
     # Читаем файлик с уровнем
@@ -142,17 +143,22 @@ def main():
                 free_platforms += 1
 
             elif symbol == "1":  # платформа с шипом
-                # последняя добавленная платформа
-                last_p = platforms[len(platforms) - 1]
-                # если пол
-                if isinstance(last_p, blocks.Wall) and last_p.is_free:
-                    platform = Wall(x, y)
-                else:
-                    platform = Platform(x, y)
-                    platform.is_free = False
+                platform = Platform(x, y)
+                platform.is_free = False
                 spike = Spike(x, y)
                 entities.add(spike)
                 platforms.append(spike)
+
+            elif symbol == "2":  # пол с шипом
+                platform = Wall(x, y)
+                spike = Spike(x, y)
+                entities.add(spike)
+                platforms.append(spike)
+
+            elif symbol == "0":
+                platform = Platform(x, y)
+                platform.is_free = False
+                coords_for_tp.append((x, y))
 
             elif symbol == "=":  # стена
                 platform = Wall(x, y)
@@ -169,6 +175,12 @@ def main():
         y += PLATFORM_HEIGHT
         x = 0  # обнуление x для последующих строк
 
+    count = 0
+    for platform in platforms:
+        if platform.is_free:
+            count += 1
+    free_platforms = count
+
     """
     определяем размеры уровня с учетом границ
     """
@@ -176,13 +188,16 @@ def main():
     level_height = len(level) * PLATFORM_HEIGHT
 
     # создаем телепорт (рандомно)
-    tp = spawn_new_thing(Teleport, platforms, free_platforms, 0, 900, 64)
+    x, y = coords_for_tp[1]
+    gox, goy = coords_for_tp[0]
+    tp = Teleport(x, y, gox, goy)
     entities.add(tp)
     platforms.append(tp)
 
     entities.add(hero)
-    for i in range(0, 3):
-        monster = spawn_new_thing(Mob, platforms, free_platforms, 10)
+    for i in range(0, 10):
+        monster, free_platforms = \
+            spawn_new_thing(Mob, platforms, free_platforms, 10)
         entities.add(monster)
         mobs.add(monster)
         platforms.append(monster)
@@ -193,6 +208,7 @@ def main():
     finished = False
     while not finished:
         clock.tick(FPS)
+        print(free_platforms)
         left = right = False
         if pg.key.get_pressed()[pg.K_a]:
             left = True
@@ -231,6 +247,12 @@ def main():
 
 
         else:
+            count = 0
+            for platform in platforms:
+                if platform.is_free:
+                    count += 1
+            free_platforms = count
+
             if started:
                 # если началась игра, то включается стартовый экран
                 start_screen(screen, ls, SCREEN_WIDTH, SCREEN_HEIGHT, buttons)
@@ -269,8 +291,8 @@ def main():
                         mobs.remove(mob)
                         platforms.remove(mob)
                         free_platforms += 1
-                        enemy = spawn_new_thing(Mob, platforms, free_platforms,
-                                                10)
+                        enemy, free_platforms = \
+                            spawn_new_thing(Mob, platforms, free_platforms, 10)
                         if not type(enemy) == int:
                             entities.add(enemy)
                             mobs.add(enemy)
