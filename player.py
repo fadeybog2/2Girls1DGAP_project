@@ -25,6 +25,7 @@ class Player(pg.sprite.Sprite):
         self.attacking - атакует ли, type bool
         self.time_hit - время с последнего получения урона
         self.time_attack - время с последней атаки
+        self.time_shield - время щита
 
         self.shield - щит в момент сразу после получения урона
         self.hp - переменная, отслеживающая здоровье (хп, hp)
@@ -59,6 +60,7 @@ class Player(pg.sprite.Sprite):
 
         self.time_hit = 0
         self.time_attack = 0
+        self.time_shield = 0
         self.lives = 3
         self.hp = 5
 
@@ -96,10 +98,10 @@ class Player(pg.sprite.Sprite):
 
         self.onGround = False
         self.rect.y += self.vy
-        self.bump(0, self.vy, platforms)
+        self.bump(0, self.vy, platforms, fps)
 
         self.rect.x += self.vx  # движение игрока на Vx
-        self.bump(self.vx, 0, platforms)
+        self.bump(self.vx, 0, platforms, fps)
 
     def change_image(self, fps):
         """
@@ -145,7 +147,7 @@ class Player(pg.sprite.Sprite):
         else:
             self.image = image
 
-    def bump(self, vx, vy, platforms):
+    def bump(self, vx, vy, platforms, fps):
         """
         Функция взаимодействия с платформами и врагами (vibe check)
 
@@ -162,7 +164,7 @@ class Player(pg.sprite.Sprite):
                     self.time_hit = 0
                     self.reborn()
                 elif isinstance(p, mobs.Mob):
-                    self.check_mob_hit(p)
+                    self.check_mob_hit(p, fps)
                 elif isinstance(p, blocks.Teleport):
                     self.teleporting(p.goX, p.goY)
 
@@ -184,7 +186,7 @@ class Player(pg.sprite.Sprite):
                         self.rect.top = p.rect.bottom  # не может пробить платформу
                         self.vy = 0
 
-    def check_mob_hit(self, mob):
+    def check_mob_hit(self, mob, fps):
         """
         Функция проверяет тип столкновения с мобом
 
@@ -201,7 +203,8 @@ class Player(pg.sprite.Sprite):
         else:
             self.got_hit = True
             self.time_hit = 0
-            self.get_damage()  # иначе сами теряем хп
+            self.get_damage(fps)  # иначе сами теряем хп
+            self.shield = True
 
     def teleporting(self, goX, goY):
         """
@@ -215,13 +218,21 @@ class Player(pg.sprite.Sprite):
         self.rect.x = goX
         self.rect.y = goY
 
-    def get_damage(self):
+    def get_damage(self, fps):
         """
         Функция получения урона (уменьшения здоровья)
 
+        fps - частота кадров
+
         Если осталось здороровье - ничего; не осталось - респавнится
         """
-        self.hp -= 1
+        if self.shield:
+            self.time_shield += 1
+            if self.time_shield == fps:
+                self.shield = False
+                self.time_shield = 0
+        if not self.shield:
+            self.hp -= 1
         if self.hp == 0:  # умер
             self.reborn()
 

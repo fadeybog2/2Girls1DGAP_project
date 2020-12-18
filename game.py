@@ -208,7 +208,6 @@ def main():
     finished = False
     while not finished:
         clock.tick(FPS)
-        print(free_platforms)
         left = right = False
         if pg.key.get_pressed()[pg.K_a]:
             left = True
