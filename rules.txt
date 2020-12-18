@@ -1,0 +1,13 @@
+Welcome to the Bowling for your life!
+We put a lot of time, effort an love into this ptoject.
+Hope you'll like it!
+It's a game about bowling and having fun. 
+Control:
+A - move left
+D - move right
+W - jump
+alt - fireball
+To harm the pins, you can either jump on them or 
+throw a fireball at them
+Watch out for thorns! They instantly kill bowling balls
+Good luck and don't mess it up!
