@@ -17,12 +17,12 @@ class Button:
         self.color = color
         self.click = False
 
-    def draw(self):
+    def draw(self, color_of_text):
         pg.draw.rect(self.screen, self.color, (self.x, self.y,
                                                self.w_x + 10, self.w_y + 10))
         rect_center = (self.x + (self.w_x + 10)//2, self.y + (self.w_y + 10)//2)
         f = pg.font.Font(None, 36)
-        text = f.render(self.name, True, TEXT_COLOR)
+        text = f.render(self.name, True, color_of_text)
         text_rect = text.get_rect(center=rect_center)
         self.screen.blit(text, text_rect)
 
@@ -49,25 +49,25 @@ def start_screen(screen, back, SCREEN_WIDTH, SCREEN_HEIGHT, buttons):
     text_rect = text.get_rect(center=rect_center)
     screen.blit(text, text_rect)
     for button in buttons:
-        button.draw()
+        button.draw(TEXT_COLOR)
 
-'''
-def manual_draw(screen, back, SCREEN_WIDTH, SCREEN_HEIGHT)
+
+def manual_draw(screen, back, SCREEN_WIDTH, SCREEN_HEIGHT, button):
     back_height = SCREEN_HEIGHT
     size = back.get_rect().size
     back_width = size[0] * back_height // size[1]
     back = pg.transform.scale(back, [back_width, back_height])
     back_rect = back.get_rect(center=[SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2])
     screen.blit(back, back_rect)
-    f = pg.font.Font(None, 36)
-    text = f.render('Rules og the game', True, (180, 0, 0))
-    screen.blit(text, (450, 20))
-    text = f.render(
-        'Your goal is to defeat all of the monsters on the screen', True,
-        (0, 0, 0))
-    screen.blit(text, (150, 55))
-    f = pygame.font.Font(None, 24)
-    text = f.render('Use A for moving to the left', True,
-                    (0, 0, 0))
-    screen.blit(text, (50, 100))
-    '''
+    f = pg.font.Font(None, 25)
+    file = open('rules.txt', 'r')
+    rules = [line.strip() for line in file]
+    i = 0
+    pg.draw.rect(screen, BLACK, (89, 89, 600, 471))
+    for rule in rules:
+        text = f.render(rule, True,
+                        (255, 255, 255))
+        screen.blit(text, (100, 100+35*i))
+        i += 1
+    button.draw(WHITE)
+
