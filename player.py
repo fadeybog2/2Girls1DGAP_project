@@ -1,4 +1,4 @@
-from pygame import *
+import pygame as pg
 import blocks
 import mobs
 
@@ -9,7 +9,7 @@ GRAVITY = 0.5
 FIREBALL_VELOCITY = 10
 
 
-class Player(sprite.Sprite):
+class Player(pg.sprite.Sprite):
     def __init__(self, x, y):
         """
         Конструктор класса Player
@@ -24,14 +24,14 @@ class Player(sprite.Sprite):
         можно загрузить любой спрайт с названием hero.png и hero_scream.png, код
         сам отформатирует размер
         """
-        sprite.Sprite.__init__(self)
-        self.image0 = image.load("hero.png")  # норми спрайт
-        self.image1 = image.load("hero_scream.png")  # атакующий
+        pg.sprite.Sprite.__init__(self)
+        self.image0 = pg.image.load("hero.png")  # норми спрайт
+        self.image1 = pg.image.load("hero_scream.png")  # атакующий
         hero_size = self.image0.get_rect().size
         self.height = HEIGHT
         self.width = self.height * hero_size[0] // hero_size[1]
-        self.image0 = transform.scale(self.image0, [self.width, self.height])
-        self.image1 = transform.scale(self.image1, [self.width, self.height])
+        self.image0 = pg.transform.scale(self.image0, [self.width, self.height])
+        self.image1 = pg.transform.scale(self.image1, [self.width, self.height])
 
         self.image = self.image0  # default
         self.rect = self.image.get_rect(topleft=(x, y))
@@ -75,7 +75,7 @@ class Player(sprite.Sprite):
             self.vx = 0
 
         if self.facing_right:
-            self.image = transform.flip(image, True, False)
+            self.image = pg.transform.flip(image, True, False)
         else:
             self.image = image
 
@@ -99,7 +99,7 @@ class Player(sprite.Sprite):
         platforms: список платформ
         """
         for p in platforms:
-            if sprite.collide_rect(self, p):
+            if pg.sprite.collide_rect(self, p):
                 # проверка столкновения с платформой
                 if isinstance(p, blocks.Spike):
                     # если пересакаемый блок - шипы
@@ -141,9 +141,8 @@ class Player(sprite.Sprite):
             self.vy = -2 * JUMP_POWER // 3  # отталкиваемся от моба
             self.rect.y += self.vy
             mob.hp -= 3  # понижаем хп моба
-            print(vector_y)
+            mob.got_hit = True  # для анимации
         else:
-            print(vector_y)
             self.reborn()  # иначе сами теряем хп
 
     def teleporting(self, goX, goY):
@@ -170,7 +169,7 @@ class Player(sprite.Sprite):
         else:
             self.vx = 0
             self.vy = 0
-            time.wait(500)
+            pg.time.wait(500)
             self.teleporting(self.startX, self.startY)
             # перемещаемся в начальные координаты
 
@@ -181,7 +180,7 @@ class Player(sprite.Sprite):
         self.is_alive = False
 
 
-class Fireball(sprite.Sprite):
+class Fireball(pg.sprite.Sprite):
     """
     Конструктор класса Fireball
 
@@ -190,10 +189,10 @@ class Fireball(sprite.Sprite):
     self.is_alive - жив ли?
     """
     def __init__(self, x, y):
-        sprite.Sprite.__init__(self)
-        self.image = image.load("fireball.png")
+        pg.sprite.Sprite.__init__(self)
+        self.image = pg.image.load("fireball.png")
         self.rad = 12
-        self.image = transform.scale(self.image, [self.rad*2, self.rad*2])
+        self.image = pg.transform.scale(self.image, [self.rad*2, self.rad*2])
         self.rect = self.image.get_rect(center=(x, y))
         self.is_alive = True
         self.vx = FIREBALL_VELOCITY
@@ -205,7 +204,7 @@ class Fireball(sprite.Sprite):
         platforms: список платформ и стен
         """
         for p in platforms:
-            if sprite.collide_rect(self, p):
+            if pg.sprite.collide_rect(self, p):
                 # проверка столкновения с платформой
                 if not isinstance(p, mobs.Mob) or \
                         not isinstance(p, Player):
@@ -228,7 +227,8 @@ class Fireball(sprite.Sprite):
         """
         # FIXME почему-то один fireball снижает 2 hp за раз ???
         for m in mobs:
-            if sprite.collide_rect(self, m):
+            if pg.sprite.collide_rect(self, m):
                 # проверка столкновения с мобом
                 m.hp -= 1
+                m.got_hit = True  # для анимации
                 self.is_alive = False

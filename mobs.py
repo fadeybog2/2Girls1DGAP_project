@@ -1,11 +1,11 @@
-from pygame import *
+import pygame as pg
 from random import randint
 import blocks
 
 MOB_HEIGHT = 48
 
 
-class Mob(sprite.Sprite):
+class Mob(pg.sprite.Sprite):
     """
     Конструктор класса Mob
 
@@ -15,18 +15,23 @@ class Mob(sprite.Sprite):
     self.xvel - скорость передвижения по горизонтали
     self.is_alive - жив ли?
     self.is_free - можно ли спавнить что-то ему на голову
+    self.got_hit - ударили ли моба недавно (для анимации)
+    self.time_hit - время с последнего удара (нужно для анимации)
     self.hp - здоровье, задается рандомным целым числом от 1 до 10
 
     можно загрузить любой спрайт с названием mob.png, код сам отформатирует
     размер
     """
     def __init__(self, x, y, area):
-        sprite.Sprite.__init__(self)
-        self.image = image.load("mob.png")
-        mob_size = self.image.get_rect().size
-        self.height = MOB_HEIGHT
-        self.width = self.height * mob_size[0] // mob_size[1]
-        self.image = transform.scale(self.image, [self.width, self.height])
+        pg.sprite.Sprite.__init__(self)
+        self.images = [pg.image.load("mob.png"),
+                       pg.image.load("mob_rage.png")]
+        for image in self.images:
+            mob_size = image.get_rect().size
+            self.height = MOB_HEIGHT
+            self.width = self.height * mob_size[0] // mob_size[1]
+            image = pg.transform.scale(image, [self.width, self.height])
+        self.image = self.images[0]
         self.rect = self.image.get_rect(bottomleft=(x, y))
 
         self.startX, self.startY = x, y
@@ -34,9 +39,11 @@ class Mob(sprite.Sprite):
         self.xvel = randint(0, 2)
         self.is_alive = True
         self.is_free = False
+        self.got_hit = False
+        self.time_hit = 0
         self.hp = randint(1, 10)
 
-    def update(self, platforms):  # по принципу героя
+    def update(self, platforms, FPS):  # по принципу героя
         """
         Функция перемещения и обновления изображения
 
@@ -48,6 +55,14 @@ class Mob(sprite.Sprite):
         if abs(self.startX - self.rect.x) > self.area:
             self.xvel *= -1  # если прошли max растояние, то идем обратно
         self.check_if_dead()
+        if self.got_hit:
+            self.time_hit += 1
+            if self.time_hit == 1:
+                self.picture_changed(self.images[1])
+            elif self.time_hit == FPS//3:
+                self.picture_changed(self.images[0])
+                self.time_hit = 0
+                self.got_hit = False
 
     def bump(self, platforms):
         """
@@ -56,7 +71,7 @@ class Mob(sprite.Sprite):
         platforms: список платформ
         """
         for p in platforms:
-            if sprite.collide_rect(self, p) and self != p:
+            if pg.sprite.collide_rect(self, p) and self != p:
                 if self.xvel > 0:
                     self.rect.right = p.rect.left
 
@@ -64,6 +79,14 @@ class Mob(sprite.Sprite):
                     self.rect.left = p.rect.right
 
                 self.xvel *= -1  # то поворачиваем в обратную сторону
+
+    def picture_changed(self, image):
+        """
+        Функция меняет картинку моба, с обычной на "когда ударили" и наоборот
+
+        image: картинка, на которую меняем
+        """
+        self.image = image
 
     def check_if_dead(self):
         """

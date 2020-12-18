@@ -213,7 +213,7 @@ def main():
                 camera.update(hero)  # центровка камеру относительно персонажа
                 hero.update(left, right, up, attacking,
                             platforms)  # передвижение
-                mobs.update(platforms)
+                mobs.update(platforms, FPS)
                 for mob in mobs:
                     if not mob.is_alive:
                         mob.kill()  # отсеивает мёртвые

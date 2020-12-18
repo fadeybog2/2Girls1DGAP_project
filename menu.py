@@ -21,7 +21,6 @@ class Button:
         pg.draw.rect(self.screen, self.color, (self.x, self.y,
                                                self.w_x + 10, self.w_y + 10))
         rect_center = (self.x + (self.w_x + 10)//2, self.y + (self.w_y + 10)//2)
-        print(self.w_x, self.w_y)
         f = pg.font.Font(None, 36)
         text = f.render(self.name, True, TEXT_COLOR)
         text_rect = text.get_rect(center=rect_center)
