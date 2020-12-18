@@ -59,8 +59,8 @@ class Player(pg.sprite.Sprite):
 
         self.time_hit = 0
         self.time_attack = 0
-        self.lives = 5
-        self.hp = 10
+        self.lives = 3
+        self.hp = 5
 
     def update(self, left, right, up, platforms, FPS):
         """

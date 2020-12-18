@@ -51,8 +51,8 @@ def start_screen(screen, back, SCREEN_WIDTH, SCREEN_HEIGHT, buttons):
     for button in buttons:
         button.draw()
 
-
-'''def manual_draw(screen, back, SCREEN_WIDTH, SCREEN_HEIGHT)
+'''
+def manual_draw(screen, back, SCREEN_WIDTH, SCREEN_HEIGHT)
     back_height = SCREEN_HEIGHT
     size = back.get_rect().size
     back_width = size[0] * back_height // size[1]
