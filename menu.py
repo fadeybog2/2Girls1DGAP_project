@@ -32,15 +32,42 @@ class Button:
             self.click = True
 
 
-def start_screen(screen, back, SCREEN_WIDTH, SCREEN_HEIGHT, button):
+def start_screen(screen, back, SCREEN_WIDTH, SCREEN_HEIGHT, buttons):
     back_height = SCREEN_HEIGHT
     size = back.get_rect().size
     back_width = size[0] * back_height // size[1]
     back = pg.transform.scale(back, [back_width, back_height])
     back_rect = back.get_rect(center=[SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2])
     screen.blit(back, back_rect)
-    button.draw()
+    font = pg.font.Font(None, 64)
+    (width_x, width_y) = font.size('Bowling for your life')
+    start_x, start_y = 220, 180
+    pg.draw.rect(screen, BLACK, (start_x, start_y,
+                                 width_x + 10, width_y + 10))
+    rect_center = (start_x + (width_x + 10) // 2, start_y + (width_y + 10) // 2)
+    text = font.render('Bowling for your life', True, (0, 255, 255))
+    text_rect = text.get_rect(center=rect_center)
+    screen.blit(text, text_rect)
+    for button in buttons:
+        button.draw()
+
+
+'''def manual_draw(screen, back, SCREEN_WIDTH, SCREEN_HEIGHT)
+    back_height = SCREEN_HEIGHT
+    size = back.get_rect().size
+    back_width = size[0] * back_height // size[1]
+    back = pg.transform.scale(back, [back_width, back_height])
+    back_rect = back.get_rect(center=[SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2])
+    screen.blit(back, back_rect)
+    f = pg.font.Font(None, 36)
+    text = f.render('Rules og the game', True, (180, 0, 0))
+    screen.blit(text, (450, 20))
+    text = f.render(
+        'Your goal is to defeat all of the monsters on the screen', True,
+        (0, 0, 0))
+    screen.blit(text, (150, 55))
+    f = pygame.font.Font(None, 24)
+    text = f.render('Use A for moving to the left', True,
+                    (0, 0, 0))
+    screen.blit(text, (50, 100))
     '''
-    if event.type == MOUSEBUTTONDOWN:
-        button.hitting(event.pos(0), event(1))
-    return button.click '''
