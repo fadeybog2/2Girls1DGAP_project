@@ -133,22 +133,35 @@ def main():
     """
     for row in level:
         for symbol in row:
-            if symbol == "-":
+            if symbol == "-":  # обычная платформа
                 platform = Platform(x, y)
                 entities.add(platform)
                 platforms.append(platform)
                 free_platforms += 1
 
-            elif symbol == "=":
-                wall = Wall(x, y)
-                entities.add(wall)
-                platforms.append(wall)
+            elif symbol == "1":  # платформа с шипом
+                # последняя добавленная платформа
+                last_p = platforms[len(platforms) - 1]
+                # если пол
+                if isinstance(last_p, blocks.Wall) and last_p.is_free:
+                    platform = Wall(x, y)
+                else:
+                    platform = Platform(x, y)
+                    platform.is_free = False
+                spike = Spike(x, y)
+                entities.add(spike)
+                platforms.append(spike)
 
-            elif symbol == "+":
-                floor = Wall(x, y)
-                floor.is_free = True
-                entities.add(floor)
-                platforms.append(floor)
+            elif symbol == "=":  # стена
+                platform = Wall(x, y)
+
+            elif symbol == "+":  # пол
+                platform = Wall(x, y)
+                platform.is_free = True
+                free_platforms += 1
+
+            entities.add(platform)
+            platforms.append(platform)
 
             x += PLATFORM_WIDTH
         y += PLATFORM_HEIGHT
@@ -160,12 +173,10 @@ def main():
     level_width = len(level[0]) * PLATFORM_WIDTH
     level_height = len(level) * PLATFORM_HEIGHT
 
-    # создаем телепорт и шип
+    # создаем телепорт (рандомно)
     tp = spawn_new_thing(Teleport, platforms, free_platforms, 0, 900, 64)
-    sp = spawn_new_thing(Spike, platforms, free_platforms)
-    entities.add(tp, sp)
+    entities.add(tp)
     platforms.append(tp)
-    platforms.append(sp)
 
     entities.add(hero)
     for i in range(0, 3):
