@@ -100,5 +100,6 @@ class Mob(pg.sprite.Sprite):
         if self.hp <= 0:
             self.hp = 0
             hero.score += 1  # увеличиваем счет в игре
+            self.death_sound.set_volume(0.1)
             self.death_sound.play()
             self.is_alive = False
