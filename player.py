@@ -62,7 +62,7 @@ class Player(pg.sprite.Sprite):
         self.lives = 3
         self.hp = 5
 
-    def update(self, left, right, up, platforms, FPS):
+    def update(self, left, right, up, platforms, fps):
         """
         Функция обработки нажатия клавиш
 
@@ -92,7 +92,7 @@ class Player(pg.sprite.Sprite):
             # изменение скорости в прыжке
             self.vy += GRAVITY
 
-        self.change_image(FPS)
+        self.change_image(fps)
 
         self.onGround = False
         self.rect.y += self.vy
@@ -101,7 +101,7 @@ class Player(pg.sprite.Sprite):
         self.rect.x += self.vx  # движение игрока на Vx
         self.bump(self.vx, 0, platforms)
 
-    def change_image(self, FPS):
+    def change_image(self, fps):
         """
         Функция определяет какую картинку нужно выводить в зависимости от
         активности героя
@@ -112,17 +112,17 @@ class Player(pg.sprite.Sprite):
         self.picture_changed(self.images[0])
         if self.got_hit:
             self.time_hit += 1
-            if 1 <= self.time_hit < 2 * FPS // 3:
+            if 1 <= self.time_hit < 2 * fps // 3:
                 hit = 2
-            elif self.time_hit == 2 * FPS // 3:
+            elif self.time_hit == 2 * fps // 3:
                 hit = 0
                 self.time_hit = 0
                 self.got_hit = False
         if self.attacking:
             self.time_attack += 1
-            if 1 <= self.time_attack < FPS // 3:
+            if 1 <= self.time_attack < fps // 3:
                 attack = 2
-            elif self.time_attack == FPS // 3:
+            elif self.time_attack == fps // 3:
                 self.time_attack = 0
                 self.attacking = False
         if attack * hit == 4:
@@ -201,7 +201,7 @@ class Player(pg.sprite.Sprite):
         else:
             self.got_hit = True
             self.time_hit = 0
-            self.reborn()  # иначе сами теряем хп
+            self.get_damage()  # иначе сами теряем хп
 
     def teleporting(self, goX, goY):
         """
@@ -215,18 +215,29 @@ class Player(pg.sprite.Sprite):
         self.rect.x = goX
         self.rect.y = goY
 
+    def get_damage(self):
+        """
+        Функция получения урона (уменьшения здоровья)
+
+        Если осталось здороровье - ничего; не осталось - респавнится
+        """
+        self.hp -= 1
+        if self.hp == 0:  # умер
+            self.reborn()
+
     def reborn(self):
         """
         Функция возрождения
 
         Если жизни еще остались - возрождается, если нет - умирает и endscreen
         """
-        self.hp -= 1
-        if self.hp == 0:  # умер совсем
+        self.lives -= 1
+        if self.lives == 0:  # умер совсем
             self.die()
         else:
             self.vx = 0
             self.vy = 0
+            self.hp = 5
             pg.time.wait(500)
             self.teleporting(self.startX, self.startY)
             # перемещаемся в начальные координаты
