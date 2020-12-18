@@ -98,7 +98,9 @@ def main():
     pg.display.set_caption("Bowling4life")
     surf = Surface((SCREEN_WIDTH, SCREEN_HEIGHT))  # Поверхность для рисования
     surf.fill(BLACK)
-    play = Button(screen, 380, 300, BLACK, 'Play!')
+    play = Button(screen, 380, 250, BLACK, 'play!')
+    rules = Button(screen, 380, 300, BLACK, 'rules')
+    buttons = [play, rules]
     ls = pg.image.load("Zastavka.jpg")
     bg = pg.image.load("background.jpg")  # background
     bg_width = bg.get_rect().size[0] * SCREEN_WIDTH // SCREEN_HEIGHT
@@ -109,6 +111,7 @@ def main():
     up = attacking = False
     gameplay = False  # идет ли игра
     started = True  # запустили ли игру только что
+    manual = False  # открыты ли правила
 
     entities = pg.sprite.Group()  # Все рисуемые объекты
     mobs = pg.sprite.Group()  # Все движущиеся объекты
@@ -203,11 +206,18 @@ def main():
 
         else:
             if started:
-                sss += 1
-                start_screen(screen, ls, SCREEN_WIDTH, SCREEN_HEIGHT, play)
-            if sss > 3*FPS:
-                started, gameplay = False, True
-
+                start_screen(screen, ls, SCREEN_WIDTH, SCREEN_HEIGHT, buttons)
+                for event in pg.event.get():
+                    if event.type == MOUSEBUTTONDOWN:
+                        (x_hit, y_hit) = event.pos
+                        play.hitting(x_hit, y_hit)
+                        rules.hitting(x_hit, y_hit)
+                        if play.click:
+                            started, gameplay = False, True
+                        if rules.click:
+                            started, manual = False, True
+            '''if manual:
+                manual_draw(screen, ls, SCREEN_WIDTH, SCREEN_HEIGHT)'''
             if gameplay:
                 screen.blit(bg, bg_rect)
                 camera.update(hero)  # центровка камеру относительно персонажа
