@@ -115,8 +115,7 @@ def manual_draw(screen, back, SCREEN_WIDTH, SCREEN_HEIGHT, button):
     pg.draw.rect(screen, BLACK, (89, 89, 600, 471))
     # Цикл отрисовки всех надписей построчно
     for rule in rules:
-        text = f.render(rule, True,
-                        (255, 255, 255))
+        text = f.render(rule, True, WHITE)
         screen.blit(text, (100, 100 + 35 * i))
         i += 1
     # Рисуем кнопочку quit
