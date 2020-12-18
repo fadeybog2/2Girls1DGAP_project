@@ -2,6 +2,7 @@ import pygame as pg
 from player import *
 from blocks import *
 from mobs import *
+from menu import *
 from random import randint
 
 SCREEN_WIDTH = 800
@@ -30,8 +31,10 @@ def camera_configure(camera, target_rect):
     l, t = -l + SCREEN_WIDTH / 2, -t + SCREEN_HEIGHT / 2
 
     l = min(0, l)  # Не движемся дальше левой границы
-    l = max(-(camera.width - SCREEN_WIDTH), l)  # Не движемся дальше правой границы
-    t = max(-(camera.height - SCREEN_HEIGHT), t)  # Не движемся дальше нижней границы
+    l = max(-(camera.width - SCREEN_WIDTH),
+            l)  # Не движемся дальше правой границы
+    t = max(-(camera.height - SCREEN_HEIGHT),
+            t)  # Не движемся дальше нижней границы
     t = min(0, t)  # Не движемся дальше верхней границы
 
     return Rect(l, t, w, h)
@@ -95,14 +98,17 @@ def main():
     pg.display.set_caption("Bowling4life")
     surf = Surface((SCREEN_WIDTH, SCREEN_HEIGHT))  # Поверхность для рисования
     surf.fill(BLACK)
+    play = Button(screen, 380, 300, BLACK, 'Play!')
+    ls = pg.image.load("Zastavka.jpg")
     bg = pg.image.load("background.jpg")  # background
     bg_width = bg.get_rect().size[0] * SCREEN_WIDTH // SCREEN_HEIGHT
     bg = pg.transform.scale(bg, [bg_width, SCREEN_HEIGHT])
     bg_rect = bg.get_rect(center=[SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2])
-    screen.blit(bg, bg_rect)
 
     hero = Player(55, 55)  # создаем героя по выбраным координатам
     up = attacking = False
+    gameplay = False  # идет ли игра
+    started = True  # запустили ли игру только что
 
     entities = pg.sprite.Group()  # Все рисуемые объекты
     mobs = pg.sprite.Group()  # Все движущиеся объекты
@@ -155,6 +161,7 @@ def main():
         platforms.append(monster)
 
     clock = pg.time.Clock()
+    sss = 0
 
     camera = Camera(camera_configure, level_width, level_height)
     finished = False
@@ -191,30 +198,40 @@ def main():
             text = font.render("YOU DIED", True, WHITE)
             text_rect = text.get_rect(center=(SCREEN_WIDTH // 2,
                                               SCREEN_HEIGHT // 2))
+            gameplay = False
             screen.blit(text, text_rect)
 
         else:
-            screen.blit(bg, bg_rect)
-            camera.update(hero)  # центровка камеру относительно персонажа
-            hero.update(left, right, up, attacking, platforms)  # передвижение
-            mobs.update(platforms)
-            for mob in mobs:
-                if not mob.is_alive:
-                    mob.kill()  # отсеивает мёртвые
-                    mobs.remove(mob)
-                    platforms.remove(mob)
-                    free_platforms += 1
-                    enemy = spawn_new_thing(Mob, platforms, free_platforms, 10)
-                    if not type(enemy) == int:
-                        entities.add(enemy)
-                        mobs.add(enemy)
-                        platforms.append(enemy)
-            for ball in balls:
-                if not ball.is_alive:
-                    ball.kill()  # отсеивает мёртвые
-                ball.move(mobs, platforms)
-            for entity in entities:
-                screen.blit(entity.image, camera.apply(entity))
+            if started:
+                sss += 1
+                start_screen(screen, ls, SCREEN_WIDTH, SCREEN_HEIGHT, play)
+            if sss > 3*FPS:
+                started, gameplay = False, True
+
+            if gameplay:
+                screen.blit(bg, bg_rect)
+                camera.update(hero)  # центровка камеру относительно персонажа
+                hero.update(left, right, up, attacking,
+                            platforms)  # передвижение
+                mobs.update(platforms)
+                for mob in mobs:
+                    if not mob.is_alive:
+                        mob.kill()  # отсеивает мёртвые
+                        mobs.remove(mob)
+                        platforms.remove(mob)
+                        free_platforms += 1
+                        enemy = spawn_new_thing(Mob, platforms, free_platforms,
+                                                10)
+                        if not type(enemy) == int:
+                            entities.add(enemy)
+                            mobs.add(enemy)
+                            platforms.append(enemy)
+                for ball in balls:
+                    if not ball.is_alive:
+                        ball.kill()  # отсеивает мёртвые
+                    ball.move(mobs, platforms)
+                for entity in entities:
+                    screen.blit(entity.image, camera.apply(entity))
 
         pg.display.update()
 
