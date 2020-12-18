@@ -100,6 +100,7 @@ def main():
     surf.fill(BLACK)
     play = Button(screen, 380, 250, BLACK, 'play!')
     rules = Button(screen, 380, 300, BLACK, 'rules')
+    quit = Button(screen, 350, 560, BLACK, 'quit')
     buttons = [play, rules]
     ls = pg.image.load("Zastavka.jpg")
     bg = pg.image.load("background.jpg")  # background
@@ -219,8 +220,14 @@ def main():
                             started, gameplay = False, True
                         if rules.click:
                             started, manual = False, True
-            '''if manual:
-                manual_draw(screen, ls, SCREEN_WIDTH, SCREEN_HEIGHT)'''
+            if manual:
+                manual_draw(screen, ls, SCREEN_WIDTH, SCREEN_HEIGHT, quit)
+                for event in pg.event.get():
+                    if event.type == MOUSEBUTTONDOWN:
+                        (x_hit, y_hit) = event.pos
+                        quit.hitting(x_hit, y_hit)
+                        if quit.click:
+                            started, manual = True, False
             if gameplay:
                 screen.blit(bg, bg_rect)
                 camera.update(hero)  # центровка камеру относительно персонажа
