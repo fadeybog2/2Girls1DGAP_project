@@ -75,7 +75,7 @@ class Teleport(Platform):
         Platform.__init__(self, x, y)
         self.image = image.load("portal.png")
         self.height = 48
-        self.width = 32
+        self.width = 48
         self.image = transform.scale(self.image, [self.width, self.height])
         self.rect = self.image.get_rect(bottomleft=(x, y))
         self.goX = goX  # координаты назначения перемещения
