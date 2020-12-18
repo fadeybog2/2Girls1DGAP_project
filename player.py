@@ -56,6 +56,7 @@ class Player(pg.sprite.Sprite):
         self.vx = self.vy = 0
         self.startX, self.startY = x, y
         self.teleporting_sound = pg.mixer.Sound('teleporting_sound.wav')
+        self.teleporting_sound.set_volume(0.1)
         self.onGround = False
         self.is_alive = True
         self.facing_right = False
