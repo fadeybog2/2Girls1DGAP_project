@@ -143,6 +143,12 @@ def main():
                 entities.add(wall)
                 platforms.append(wall)
 
+            elif symbol == "+":
+                floor = Wall(x, y)
+                floor.is_free = True
+                entities.add(floor)
+                platforms.append(floor)
+
             x += PLATFORM_WIDTH
         y += PLATFORM_HEIGHT
         x = 0  # обнуление x для последующих строк
@@ -168,11 +174,9 @@ def main():
         platforms.append(monster)
 
     clock = pg.time.Clock()
-    sss = 0
 
     camera = Camera(camera_configure, level_width, level_height)
     finished = False
-    counter = 0
     while not finished:
         clock.tick(FPS)
         left = right = False
