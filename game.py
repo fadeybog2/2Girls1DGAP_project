@@ -214,42 +214,36 @@ def main():
     finished = False
     while not finished:
         clock.tick(FPS)
-        left = right = False
-        if pg.key.get_pressed()[pg.K_a]:
-            left = True
-        if pg.key.get_pressed()[pg.K_d]:
-            right = True
-        for event in pg.event.get():
-            if event.type == QUIT:
-                finished = True
-            if event.type == KEYDOWN and event.key == K_w:
-                up = True
-            if event.type == KEYUP and event.key == K_w:
-                up = False
-            if event.type == KEYDOWN and event.key == K_LALT:
-                ball = spawn_fireball(hero)
-                balls.add(ball)
-                entities.add(ball)
-                hero.attacking = True
-                hero.time_attack = 0
 
         if not hero.is_alive:
+            # рисуем фон
             screen.fill(BLACK)
             font = pg.font.Font(None, 120)
             text = font.render("YOU DIED", True, WHITE)
             text_rect = text.get_rect(center=(SCREEN_WIDTH // 2,
                                               SCREEN_HEIGHT // 2))
+            score_str = "Score:  " + str(hero.score)
+            font = pg.font.Font(None, 40)
+            text2 = font.render(score_str, True, WHITE)
+            text_rect2 = text.get_rect(topleft=(30, 30))
+            screen.blit(text2, text_rect2)
+
+            pg.mixer.music.load('menu_sound.mp3')
+            pg.mixer.music.set_volume(0.1)
+            pg.mixer.music.play(-1)
             gameplay = False
             screen.blit(text, text_rect)
             restart.draw(WHITE)
             for event in pg.event.get():
+                if event.type == QUIT:
+                    finished = True
                 if event.type == MOUSEBUTTONDOWN:
                     (x_hit, y_hit) = event.pos
                     restart.hitting(x_hit, y_hit)
                     if restart.click:
                         hero.lives = 3
-                        hero.is_alive, started, gameplay = True, True, False
-
+                        hero.is_alive, started, manual = True, True, False
+                        restart.click = False
 
         else:
             count = 0
@@ -263,6 +257,8 @@ def main():
                 start_screen(screen, ls, SCREEN_WIDTH, SCREEN_HEIGHT, buttons)
                 # проверка нажатия кнопочек
                 for event in pg.event.get():
+                    if event.type == QUIT:
+                        finished = True
                     if event.type == MOUSEBUTTONDOWN:
                         (x_hit, y_hit) = event.pos
                         play.hitting(x_hit, y_hit)
@@ -273,26 +269,48 @@ def main():
                             # фоновая музыка игрового процесса
                             pg.mixer.music.load('gameplay_sound.mp3')  
                             pg.mixer.music.play(-1)
-
+                            play.click = False
                             
                         if rules.click:
                             # закрываем меню, открываем правила
                             started, manual = False, True
+                            rules.click = False
                             
             if manual:
                 # если тыкнули на правила, то рисуем правила
                 manual_draw(screen, ls, SCREEN_WIDTH, SCREEN_HEIGHT, quit)
                 # Чекаем, попали ли по кнопке выход
                 for event in pg.event.get():
+                    if event.type == QUIT:
+                        finished = True
                     if event.type == MOUSEBUTTONDOWN:
                         (x_hit, y_hit) = event.pos
                         quit.hitting(x_hit, y_hit)
                         if quit.click:
                             # если попали, то закрываем мануал, открываем меню
                             started, manual = True, False
+
             if gameplay:
                 # наконеч-то начинаем играть в боОоулинг
                 screen.blit(bg, bg_rect)
+                left = right = False
+                if pg.key.get_pressed()[pg.K_a]:
+                    left = True
+                if pg.key.get_pressed()[pg.K_d]:
+                    right = True
+                for event in pg.event.get():
+                    if event.type == QUIT:
+                        finished = True
+                    if event.type == KEYDOWN and event.key == K_w:
+                        up = True
+                    if event.type == KEYUP and event.key == K_w:
+                        up = False
+                    if event.type == KEYDOWN and event.key == K_LALT:
+                        ball = spawn_fireball(hero)
+                        balls.add(ball)
+                        entities.add(ball)
+                        hero.attacking = True
+                        hero.time_attack = 0
                 camera.update(hero)  # центровка камеру относительно персонажа
                 hero.update(left, right, up, platforms, FPS)  # передвижение
                 mobs.update(platforms, FPS, hero)
@@ -320,8 +338,7 @@ def main():
                                                        health_y])
                     screen.blit(health, hp_rect)
                 for i in range(hero.lives):
-                    lf_rect = life.get_rect(topleft=[life_x + 35 * i,
-                                                           life_y])
+                    lf_rect = life.get_rect(topleft=[life_x + 35 * i, life_y])
                     screen.blit(life, lf_rect)
                 # Подписываем, где что
                 font = pg.font.Font(None, 30)
