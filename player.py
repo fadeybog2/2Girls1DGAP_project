@@ -30,6 +30,7 @@ class Player(pg.sprite.Sprite):
         self.shield - щит в момент сразу после получения урона
         self.hp - переменная, отслеживающая здоровье (хп, hp)
         self.lives - жизни
+        self.score - счет
 
         можно загрузить любой спрайт с названием hero.png и hero_scream.png, код
         сам отформатирует размер
@@ -63,6 +64,7 @@ class Player(pg.sprite.Sprite):
         self.time_shield = 0
         self.lives = 3
         self.hp = 5
+        self.score = 0
 
     def update(self, left, right, up, platforms, fps):
         """
@@ -258,6 +260,7 @@ class Player(pg.sprite.Sprite):
         Функция смерти
         """
         self.is_alive = False
+        self.score = 0
 
 
 class Fireball(pg.sprite.Sprite):

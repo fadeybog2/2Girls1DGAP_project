@@ -283,7 +283,7 @@ def main():
                 screen.blit(bg, bg_rect)
                 camera.update(hero)  # центровка камеру относительно персонажа
                 hero.update(left, right, up, platforms, FPS)  # передвижение
-                mobs.update(platforms, FPS)
+                mobs.update(platforms, FPS, hero)
                 for mob in mobs:
                     if not mob.is_alive:
                         mob.kill()  # отсеивает мёртвые
@@ -314,11 +314,16 @@ def main():
                 # Подписываем, где что
                 font = pg.font.Font(None, 30)
                 text = font.render("Lives:", True, WHITE)
-                text_rect = text.get_rect(topleft = (0, 5))
+                text_rect = text.get_rect(topleft=(0, 5))
                 screen.blit(text, text_rect)
                 text1 = font.render("HP:", True, WHITE)
                 text_rect1 = text.get_rect(topleft=(0, 39))
                 screen.blit(text1, text_rect1)
+                score_str = "Score:  " + str(hero.score)
+                font = pg.font.Font(None, 40)
+                text2 = font.render(score_str, True, WHITE)
+                text_rect2 = text.get_rect(topright=(700, 5))
+                screen.blit(text2, text_rect2)
 
         pg.display.update()
 

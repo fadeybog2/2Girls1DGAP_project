@@ -44,7 +44,7 @@ class Mob(pg.sprite.Sprite):
         self.time_hit = 0
         self.hp = randint(1, 10)
 
-    def update(self, platforms, FPS):  # по принципу героя
+    def update(self, platforms, fps, hero):  # по принципу героя
         """
         Функция перемещения и обновления изображения
 
@@ -55,12 +55,12 @@ class Mob(pg.sprite.Sprite):
 
         if abs(self.startX - self.rect.x) > self.area:
             self.xvel *= -1  # если прошли max растояние, то идем обратно
-        self.check_if_dead()
+        self.check_if_dead(hero)
         if self.got_hit:
             self.time_hit += 1
             if self.time_hit == 1:
                 self.picture_changed(self.images[1])
-            elif self.time_hit == FPS//3:
+            elif self.time_hit == fps//3:
                 self.picture_changed(self.images[0])
                 self.time_hit = 0
                 self.got_hit = False
@@ -89,10 +89,11 @@ class Mob(pg.sprite.Sprite):
         """
         self.image = image
 
-    def check_if_dead(self):
+    def check_if_dead(self, hero):
         """
         Функция проверяет жив ли моб
         """
         if self.hp <= 0:
             self.hp = 0
+            hero.score += 1  # увеличиваем счет в игре
             self.is_alive = False
