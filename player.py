@@ -18,31 +18,51 @@ class Player(pg.sprite.Sprite):
         self.startX, self.startY = x, y - начальные координаты
         self.onGround - переменная, отслеживающая нахождение на земле
         self.is_alive - жив ли?
-        self.facing_right - куда смотрит персонаж
+
+        переменные для анимации:
+        self.facing_right - куда смотрит персонаж, type bool
+        self.got_hit - получил ли урон недавно, type bool
+        self.attacking - атакует ли, type bool
+        self.time_hit - время с последнего получения урона
+        self.time_attack - время с последней атаки
+
+        self.shield - щит в момент сразу после получения урона
         self.hp - переменная, отслеживающая здоровье (хп, hp)
+        self.lives - жизни
 
         можно загрузить любой спрайт с названием hero.png и hero_scream.png, код
         сам отформатирует размер
         """
         pg.sprite.Sprite.__init__(self)
-        self.image0 = pg.image.load("hero.png")  # норми спрайт
-        self.image1 = pg.image.load("hero_scream.png")  # атакующий
-        hero_size = self.image0.get_rect().size
+        self.images = [pg.image.load("hero.png"),  # норми
+                       pg.image.load("hero_rage.png"),  # получает урон
+                       pg.image.load("hero_scream.png"),  # атакует
+                       pg.image.load("hero_rage_scream.png")]  # атакует&урон
+        # форматируем размер
         self.height = HEIGHT
-        self.width = self.height * hero_size[0] // hero_size[1]
-        self.image0 = pg.transform.scale(self.image0, [self.width, self.height])
-        self.image1 = pg.transform.scale(self.image1, [self.width, self.height])
+        for i in range(0, len(self.images)):
+            hero_size = self.images[i].get_rect().size
+            self.width = self.height * hero_size[0] // hero_size[1]
+            self.images[i] = pg.transform.scale(self.images[i],
+                                                [self.width, self.height])
 
-        self.image = self.image0  # default
+        self.image = self.images[0]  # default
         self.rect = self.image.get_rect(topleft=(x, y))
         self.vx = self.vy = 0
         self.startX, self.startY = x, y
         self.onGround = False
         self.is_alive = True
         self.facing_right = False
-        self.hp = 5
+        self.got_hit = False
+        self.attacking = False
+        self.shield = False
 
-    def update(self, left, right, up, attacking, platforms):
+        self.time_hit = 0
+        self.time_attack = 0
+        self.lives = 5
+        self.hp = 10
+
+    def update(self, left, right, up, platforms, FPS):
         """
         Функция обработки нажатия клавиш
 
@@ -51,13 +71,7 @@ class Player(pg.sprite.Sprite):
         up: прыжок
         platforms: список платформ
         attacking: переменная, отслеживающая атаку
-        image: рисуемый спрайт
         """
-        if attacking:
-            image = self.image1
-        else:
-            image = self.image0
-
         if up:
             if self.onGround:
                 # двойной прыжок не прописан, прыгает только с земли
@@ -74,14 +88,11 @@ class Player(pg.sprite.Sprite):
         if not (left or right):  # стоит чиллит
             self.vx = 0
 
-        if self.facing_right:
-            self.image = pg.transform.flip(image, True, False)
-        else:
-            self.image = image
-
         if not self.onGround:
             # изменение скорости в прыжке
             self.vy += GRAVITY
+
+        self.change_image(FPS)
 
         self.onGround = False
         self.rect.y += self.vy
@@ -89,6 +100,50 @@ class Player(pg.sprite.Sprite):
 
         self.rect.x += self.vx  # движение игрока на Vx
         self.bump(self.vx, 0, platforms)
+
+    def change_image(self, FPS):
+        """
+        Функция определяет какую картинку нужно выводить в зависимости от
+        активности героя
+
+        FPS: фпс - частота кадров
+        """
+        attack = hit = 0
+        self.picture_changed(self.images[0])
+        if self.got_hit:
+            self.time_hit += 1
+            if 1 <= self.time_hit < 2 * FPS // 3:
+                hit = 2
+            elif self.time_hit == 2 * FPS // 3:
+                hit = 0
+                self.time_hit = 0
+                self.got_hit = False
+        if self.attacking:
+            self.time_attack += 1
+            if 1 <= self.time_attack < FPS // 3:
+                attack = 2
+            elif self.time_attack == FPS // 3:
+                self.time_attack = 0
+                self.attacking = False
+        if attack * hit == 4:
+            self.picture_changed(self.images[3])
+        elif attack == 2:
+            self.picture_changed(self.images[2])
+        elif hit == 2:
+            self.picture_changed(self.images[1])
+
+    def picture_changed(self, image):
+        """
+        Функция меняет картинку на заданную
+
+        image: картинка, на которую меняем
+        """
+        self.image = image
+        # куда смотрит персонаж
+        if self.facing_right:
+            self.image = pg.transform.flip(image, True, False)
+        else:
+            self.image = image
 
     def bump(self, vx, vy, platforms):
         """
@@ -103,6 +158,8 @@ class Player(pg.sprite.Sprite):
                 # проверка столкновения с платформой
                 if isinstance(p, blocks.Spike):
                     # если пересакаемый блок - шипы
+                    self.got_hit = True
+                    self.time_hit = 0
                     self.reborn()
                 elif isinstance(p, mobs.Mob):
                     self.check_mob_hit(p)
@@ -111,7 +168,6 @@ class Player(pg.sprite.Sprite):
 
                 else:
                     if vx > 0:
-
                         self.rect.right = p.rect.left
                         self.vx = 0
 
@@ -143,6 +199,8 @@ class Player(pg.sprite.Sprite):
             mob.hp -= 3  # понижаем хп моба
             mob.got_hit = True  # для анимации
         else:
+            self.got_hit = True
+            self.time_hit = 0
             self.reborn()  # иначе сами теряем хп
 
     def teleporting(self, goX, goY):
@@ -156,7 +214,7 @@ class Player(pg.sprite.Sprite):
         self.vy = 0
         self.rect.x = goX
         self.rect.y = goY
-        
+
     def reborn(self):
         """
         Функция возрождения
@@ -188,11 +246,13 @@ class Fireball(pg.sprite.Sprite):
     x, y - начальные координаты
     self.is_alive - жив ли?
     """
+
     def __init__(self, x, y):
         pg.sprite.Sprite.__init__(self)
         self.image = pg.image.load("fireball.png")
         self.rad = 12
-        self.image = pg.transform.scale(self.image, [self.rad*2, self.rad*2])
+        self.image = pg.transform.scale(self.image,
+                                        [self.rad * 2, self.rad * 2])
         self.rect = self.image.get_rect(center=(x, y))
         self.is_alive = True
         self.vx = FIREBALL_VELOCITY

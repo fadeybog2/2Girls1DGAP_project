@@ -187,13 +187,8 @@ def main():
                 ball = spawn_fireball(hero)
                 balls.add(ball)
                 entities.add(ball)
-                attacking = True
-
-        if attacking:
-            counter += 1
-            if counter == FPS // 3:
-                counter = 0
-                attacking = False
+                hero.attacking = True
+                hero.time_attack = 0
 
         if not hero.is_alive:
             screen.fill(BLACK)
@@ -221,8 +216,7 @@ def main():
             if gameplay:
                 screen.blit(bg, bg_rect)
                 camera.update(hero)  # центровка камеру относительно персонажа
-                hero.update(left, right, up, attacking,
-                            platforms)  # передвижение
+                hero.update(left, right, up, platforms, FPS)  # передвижение
                 mobs.update(platforms, FPS)
                 for mob in mobs:
                     if not mob.is_alive:

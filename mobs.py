@@ -26,11 +26,12 @@ class Mob(pg.sprite.Sprite):
         pg.sprite.Sprite.__init__(self)
         self.images = [pg.image.load("mob.png"),
                        pg.image.load("mob_rage.png")]
-        for image in self.images:
-            mob_size = image.get_rect().size
+        for i in range(0, len(self.images) - 1):
+            mob_size = self.images[i].get_rect().size
             self.height = MOB_HEIGHT
             self.width = self.height * mob_size[0] // mob_size[1]
-            image = pg.transform.scale(image, [self.width, self.height])
+            self.images[i] = pg.transform.scale(self.images[i],
+                                                [self.width, self.height])
         self.image = self.images[0]
         self.rect = self.image.get_rect(bottomleft=(x, y))
 
